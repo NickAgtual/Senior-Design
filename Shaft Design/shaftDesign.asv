@@ -81,10 +81,9 @@ sumMomentsA = 0 == (-Fp * lf) + (RCx * lBearing);
 % Solving linear system of equations
 vals = linsolve(A, b);
 
-% Assigning solved forces to variables
+% Assigning solved forces to va
 RAx = vals(1);
 RCx = vals(2);
 RAy = vals(3);
-
 
 
