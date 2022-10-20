@@ -67,13 +67,13 @@ Fp = (Fb1 + Fb2) * cosd(theta - 180);
 syms RAx RCx RAy
 
 % Sum forces x
-sumFx = 0 == -RAx + Fp - RCx;
+sumFx = 0 == RAx + Fp +RCx;
 
 % Sum forces y
 sumFy = 0 == -weightDisk - weightPulley + RAy;
 
 % Sum of moments about A
-sumMomentsA = 0 == (-Fp * lf) + (RCx * lBearing);
+sumMomentsA = 0 == (-Fp * lf) - (RCx * lBearing);
 
 % Converting equations to matrix form
 [A, b] = equationsToMatrix([sumFx sumFy sumMomentsA], [RAx RCx RAy]);
@@ -85,6 +85,46 @@ vals = linsolve(A, b);
 RAx = vals(1);
 RCx = vals(2);
 RAy = vals(3);
+
+%% Shear and Bending Moment Diagrams
+
+syms y
+
+% Shear
+shearPlot = piecewise(y < 0, 0, ...
+                      0 < y < lf, RAx, ...
+                      lf < y < lBearing, RAx + Fp, ...
+                      lBearing < y < lShaft, RAx + Fp + RCx)
+                  
+fplot(shearPlot)
+hold on
+grid on
+grid minor
+
+% Piecewise function for appearance (no line below 0 and greater than
+% length)
+white = piecewise(y < 0, 0, y > lShaft, 0);
+
+% Plotting while lines
+whitePlot = fplot(white, 'Color', [1 1 1]);
+
+% Turning asymptotes off
+whitePlot.ShowPoles = 'Off';
+
+% Plotting y = 0
+yline(0, 'k')
+
+% Setting axis limits
+xlim([-.25 lShaft + .25]);
+ylim([double((RAx + Fp)) - .0001, double(RAx) + .0001]);
+
+% Axis Descriptors
+xlabel('\emph {y - distance (in)}', ...
+    'fontsize', 12, 'Interpreter', 'latex');
+ylabel('\emph {V (lbf)}', 'fontsize', 12, 'Interpreter', 'latex');
+title('\emph {Shear Diagram}', 'fontsize', ...
+14, 'Interpreter', 'latex');
+
 
 
 
