@@ -94,16 +94,58 @@ stress.max = max(stress.temp, [], 3);
 % Solving for all the FS and storing in a matrix
 for ii = 1:length(material.density)
     for jj = 1:length(disk.outerRadius)
-        stress.fs(ii, jj) =  material.yield(ii) / stress.max(ii, jj);
+        FS.rotation(ii, jj) =  material.yield(ii) / stress.max(ii, jj);
     end
 end
 
+
+%% Stress Due to Torsion
+
+% Torque induced by motor
+T = hp * 5252 / w;
+
+% Calculating polar moment of intertia
+J = (pi / 32) .* ((disk.outerRadius .^ 4) - (disk.innerRadius ^ 4));
+
+% Calculating shear stress
+tau = T .* disk.outerRadius ./ J;
+
+% Initializing FS matrix due to torison
+FS.torsion = zeros(length(material.density), length(disk.outerRadius));
+
+% FS due to torsion
+for ii = 1:length(material.density)
+    for jj = 1: length(tau)
+        
+        FS.torsion(ii, jj) = material.yield(ii) / tau(jj);
+        
+    end
+end
+
+%% Stress Tensor
+% Initializing FS matrix for principal stresses
+FS.principal = zeros(length(material.density), length(disk.outerRadius));
+
+for ii = 1:length(material.density)
+    for jj = 1:length(disk.outerRadius)
+        
+        % Creating stress tensors (plane-stress)
+        stressTensor = [stress.rMax(ii, jj) tau(1, jj) 0; ...
+            tau(1, jj) stress.tMax(ii, jj) 0; ...
+            0 0 0];
+        
+        % FS due to principla stresses
+        FS.principal(ii, jj) = material.yield(ii) ./ max(eig(stressTensor));
+    end
+end
+
+%% FS Heat Map
 % New figure for heat map plot
 figure(2)
 
 % Plotting heat map
 heatMap = heatmap(cellstr(string(disk.outerRadius * 39.37)), ...
-    material.type, stress.fs);
+    material.type, FS.principal);
 
 % Plot descriptors
 heatMap.XLabel = '\emph {Outer Diameter (in)}';
@@ -117,26 +159,9 @@ heatMap.NodeChildren(3).YAxis.Label.Interpreter = 'latex';
 heatMap.NodeChildren(3).YAxis.Label.FontSize = 13;
 heatMap.NodeChildren(3).Title.Interpreter = 'latex';
 heatMap.NodeChildren(3).Title.FontSize = 15;
-
-%% Stress Due to Torsion
-
-% Torque induced by motor
-T = hp * 5252 / w;
-
-% Calculating polar moment of intertia
-J = (pi / 32) .* ((disk.outerRadius .^ 4) - (disk.innerRadius ^ 4));
-
-% Calculating shear stress
-tau = T .* disk.outerRadius ./ J;
-
-% FS due to torsion
-for ii = 1:length(material.density)
-    for jj = 1: length(tau)
-        
-        fs(ii, jj) = material.yield(ii) / tau(jj);
-        
-    end
-end
+            
+            
+    
 
 
 
