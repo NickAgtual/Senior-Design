@@ -4,9 +4,9 @@ material.type = {'6061-T6', 'AISI 1005', 'Cast Acrylic'};
 
 material.density = [2700 7872 1190]; % kg/m^3
 
-material.poisson = [.325 .29];
+material.poisson = [.325 .29 .37];
 
-material.yield = [255 * 10^6, 285 * 10^6] ; % Pa
+material.yield = [255 * 10^6, 285 * 10^6, 40 * 10^6] ; % Pa
 
 %% Disk Properties
 
@@ -27,6 +27,9 @@ w = 3000;
 
 % Converting to rad/s
 w = w * 2 * pi / 60;
+
+%% Motor Properties
+hp = 1;
 
 %% Stresses
 
@@ -114,6 +117,29 @@ heatMap.NodeChildren(3).YAxis.Label.Interpreter = 'latex';
 heatMap.NodeChildren(3).YAxis.Label.FontSize = 13;
 heatMap.NodeChildren(3).Title.Interpreter = 'latex';
 heatMap.NodeChildren(3).Title.FontSize = 15;
+
+%% Stress Due to Torsion
+
+% Torque induced by motor
+T = hp * 5252 / w;
+
+% Calculating polar moment of intertia
+J = (pi / 32) .* ((disk.outerRadius .^ 4) - (disk.innerRadius ^ 4));
+
+% Calculating shear stress
+tau = T .* disk.outerRadius ./ J;
+
+% FS due to torsion
+for ii = 1:length(material.density)
+    for jj = 1: length(tau)
+        
+        fs(ii
+
+
+
+
+
+
 
 
 

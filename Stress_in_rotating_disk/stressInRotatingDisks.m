@@ -28,6 +28,9 @@ w = 3000;
 % Converting to rad/s
 w = w * 2 * pi / 60;
 
+%% Motor Properties
+hp = 1;
+
 %% Stresses
 
 for ii = 1:length(material.density)
@@ -114,6 +117,33 @@ heatMap.NodeChildren(3).YAxis.Label.Interpreter = 'latex';
 heatMap.NodeChildren(3).YAxis.Label.FontSize = 13;
 heatMap.NodeChildren(3).Title.Interpreter = 'latex';
 heatMap.NodeChildren(3).Title.FontSize = 15;
+
+%% Stress Due to Torsion
+
+% Torque induced by motor
+T = hp * 5252 / w;
+
+% Calculating polar moment of intertia
+J = (pi / 32) .* ((disk.outerRadius .^ 4) - (disk.innerRadius ^ 4));
+
+% Calculating shear stress
+tau = T .* disk.outerRadius ./ J;
+
+% FS due to torsion
+for ii = 1:length(material.density)
+    for jj = 1: length(tau)
+        
+        fs(ii, jj) = material.yield(ii) / tau(jj);
+        
+    end
+end
+
+
+
+
+
+
+
 
 
 
