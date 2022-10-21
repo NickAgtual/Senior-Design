@@ -91,12 +91,15 @@ RAy = vals(3);
 syms y
 
 % Shear
-shearPlot = piecewise(y < 0, 0, ...
+shear = piecewise(y < 0, 0, ...
                       0 < y < lf, RAx, ...
                       lf < y < lBearing, RAx + Fp, ...
-                      lBearing < y < lShaft, RAx + Fp + RCx)
+                      lBearing < y < lShaft, RAx + Fp + RCx, ...
+                      y > lShaft, 0);
+                 
                   
-fplot(shearPlot)
+shearPlot = fplot(shear);
+shearPlot.ShowPoles = 'Off';
 hold on
 grid on
 grid minor
@@ -124,6 +127,8 @@ xlabel('\emph {y - distance (in)}', ...
 ylabel('\emph {V (lbf)}', 'fontsize', 12, 'Interpreter', 'latex');
 title('\emph {Shear Diagram}', 'fontsize', ...
 14, 'Interpreter', 'latex');
+
+
 
 
 

@@ -12,7 +12,7 @@ material.yield = [255 * 10^6, 285 * 10^6] ; % Pa
 
 disk.innerRadius = 5/8; % in
 
-disk.outerRadius = 8:10; % in
+disk.outerRadius = [9 10]; % in
 
 % Converting to meters
 disk.innerRadius = disk.innerRadius / 39.37;
@@ -77,19 +77,11 @@ hold off
 
 %% FOS
 
+figure
 stress.temp = cat(3, stress.rMax, stress.tMax);
 stress.max = max(stress.temp, [], 3);
 
-for ii = 1:length(material.density)
-    for jj = 1:length(disk.outerRadius)
-        stress.fs(ii, jj) =  material.yield(ii) / stress.max(ii, jj);
-    end
-end
-
-
-figure(2)
-
-heatMap = heatmap(stress.fs)
+heatMap = heatmap(stress.max)
 
 
 
