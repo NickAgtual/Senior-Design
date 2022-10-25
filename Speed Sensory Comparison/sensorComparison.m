@@ -21,3 +21,12 @@ plot(data.xAxis(2808:end), data.IRProximity(2808:end),...
 grid on
 grid minor
 
+% Plot descriptors
+xlabel('\emph {Time}','fontsize',14,'Interpreter',...
+    'latex');
+ylabel('\emph {Recorded Angular Velocity (RPM)}','fontsize',14,'Interpreter','latex');
+title('\emph {Speed Sensor Comparison}','fontsize',16,'Interpreter',...
+    'latex')
+legend('location', 'Northeast', 'Interpreter', 'latex')
+
+set(gca, 'xticklabel', []);
