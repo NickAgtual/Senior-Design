@@ -98,7 +98,7 @@ shear = piecewise(y < 0, 0, ...
                       y > lShaft, 0);
                  
                   
-shearPlot = fplot(shear);
+shearPlot = fplot(shear); 
 shearPlot.ShowPoles = 'Off';
 hold on
 grid on

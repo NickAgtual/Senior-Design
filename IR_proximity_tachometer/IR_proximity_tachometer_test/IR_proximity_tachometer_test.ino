@@ -12,7 +12,7 @@ void setup() {
   TCCR1B = 0;
   TCCR1B |= (1 << CS12); //Prescaler 256
   TIMSK1 |= (1 << TOIE1); //enable timer overflow
-  pinMode(2, INPUT);
+  pinMode(3, INPUT);
   attachInterrupt(0, RPM, FALLING);
 }
 

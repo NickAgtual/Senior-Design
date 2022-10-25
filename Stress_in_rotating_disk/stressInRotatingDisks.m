@@ -4,13 +4,13 @@ clear; clc; close all
 gravity = 9.81; % m/s^2
 
 %% Material Properties
-material.type = {'6061-T6', 'AISI 1005', 'Cast Acrylic'};
+material.type = {'6061-T6', 'A36 Steel', 'Cast Acrylic'};
 
-material.density = [2700 7872 1190]; % kg/m^3
+material.density = [2700 7800 1190]; % kg/m^3
 
-material.poisson = [.325 .29 .37];
+material.poisson = [.325 .26 .37];
 
-material.yield = [255 * 10^6, 285 * 10^6, 40 * 10^6] ; % Pa
+material.yield = [255 * 10^6, 250 * 10^6, 40 * 10^6] ; % Pa
 
 %% Disk Properties
 
@@ -36,11 +36,14 @@ w = w * 2 * pi / 60;
 disk.accessoryCompW = 1; % lbf
 
 % Disk thickness
-disk.thickness = .5; % in
+disk.thickness = 1/8; % in
+
+% Converting to meters
+disk.thickness = disk.thickness / 39.37;
 
 % Disk volume (m^3)
 disk.volume = pi * ((disk.outerRadius .^ 2) - (disk.innerRadius ^2 )) ...
-    * disk.thickness;
+    * (disk.thickness);
 
 % Disk weight
 for ii = 1:length(material.type)
@@ -157,7 +160,7 @@ sum.moments = (disk.outerRadius .* Ry) - ...
               (disk.outerRadius .* disk.accessoryCompW) == 0;
 
 % Bending moment
-M = disk.accessoryCompW .* (disk.outerRadius ./ 2);
+M = disk.accessoryCompW * 4.44822 .* (disk.outerRadius ./ 2);
 
 % Moment of inertia
 I = (1/12) .* disk.outerRadius * (disk.thickness ^ 3);

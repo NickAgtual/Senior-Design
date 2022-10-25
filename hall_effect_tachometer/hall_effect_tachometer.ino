@@ -197,16 +197,18 @@ void loop()  // Start of loop:
   // Print information on the serial monitor:
   // Comment this section if you have a display and you don't need to monitor the values on the serial monitor.
   // This is because disabling this section would make the loop run faster.
-  Serial.print("Period: ");
-  Serial.print(PeriodBetweenPulses);
-  Serial.print("\tReadings: ");
-  Serial.print(AmountOfReadings);
-  Serial.print("\tFrequency: ");
-  Serial.print(FrequencyReal);
-  Serial.print("\tRPM: ");
+
+  //Serial.print("Period: ");
+  //Serial.print(PeriodBetweenPulses);
+ // Serial.print("\tReadings: ");
+  //Serial.print(AmountOfReadings);
+  //Serial.print("\tFrequency: ");
+ // Serial.print(FrequencyReal);
+  //Serial.print("\tRPM: ");
   Serial.print(RPM);
-  Serial.print("\tTachometer: ");
-  Serial.println(average);
+  Serial.print(" ");
+  //Serial.print("\tTachometer: ");
+  //Serial.println(average);
 
 }  // End of loop.
 
