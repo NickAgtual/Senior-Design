@@ -36,7 +36,7 @@ w = w * 2 * pi / 60;
 disk.accessoryCompW = 1; % lbf
 
 % Disk thickness
-disk.thickness = 1/8; % in
+disk.thickness = 1/4; % in
 
 % Converting to meters
 disk.thickness = disk.thickness / 39.37;
