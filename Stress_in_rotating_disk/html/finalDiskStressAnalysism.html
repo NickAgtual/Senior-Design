@@ -1,0 +1,455 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>finalDiskStressAnalysism</title><meta name="generator" content="MATLAB 9.9"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2022-12-07"><meta name="DC.source" content="finalDiskStressAnalysism.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; }
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+span.typesection { color:#A0522D }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#1">Stress In Rotating Disk</a></li><li><a href="#2">Disk Parameters</a></li><li><a href="#3">Loading on Disk</a></li><li><a href="#4">Solving for Reaction Forces</a></li><li><a href="#5">Calculating Bending Moments</a></li><li><a href="#6">Stress Due to Torsion</a></li><li><a href="#7">Bending Stress</a></li><li><a href="#8">Stresses</a></li><li><a href="#9">Radial and Tangential Stress Plot</a></li><li><a href="#10">Stress Tensor</a></li></ul></div><h2 id="1">Stress In Rotating Disk</h2><pre class="codeinput">clear; clc; close <span class="string">all</span>
+
+<span class="comment">% Conversion from inches to meters</span>
+inToMeter = (1 / 39.37);
+</pre><h2 id="2">Disk Parameters</h2><pre class="codeinput"><span class="comment">% Disk material</span>
+disk.material = <span class="string">'6061 - T6 Aluminum'</span>;
+
+<span class="comment">% Thickness of disk</span>
+disk.thickness = .25 * inToMeter; <span class="comment">% m</span>
+
+<span class="comment">% Desnity of 6061-T6 aluminum</span>
+disk.density = 2700; <span class="comment">% kg/m^3</span>
+
+<span class="comment">% Poisson's ratio of 6061-T6 aluminum</span>
+disk.poisson = .325;
+
+<span class="comment">% Yield strength of 6061-T6 aluminum</span>
+disk.yield = 255 * 10^6; <span class="comment">% Pa</span>
+
+<span class="comment">% Disk inner radius</span>
+disk.innerRadius = 5/8; <span class="comment">% in</span>
+
+<span class="comment">% Disk outer radius</span>
+disk.outerRadius = 12; <span class="comment">% in</span>
+
+<span class="comment">% Converting radius values to meters</span>
+disk.innerRadius = disk.innerRadius * inToMeter;
+disk.outerRadius = disk.outerRadius * inToMeter;
+
+<span class="comment">% Radii (variable)</span>
+r = disk.innerRadius:(.1 * inToMeter):disk.outerRadius(end);
+
+<span class="comment">% Angular velocity (Max stress occures at max angular velocity)</span>
+w = 3000; <span class="comment">% rpm</span>
+
+<span class="comment">% Converting to rad/s</span>
+w = w * 2 * pi / 60;
+
+<span class="comment">% Disk volume (m^3)</span>
+disk.volume = pi * ((disk.outerRadius .^ 2) - (disk.innerRadius ^2 )) <span class="keyword">...</span>
+    * (disk.thickness);
+
+<span class="comment">% Weight of disk</span>
+disk.mass = disk.volume * disk.density; <span class="comment">% kg</span>
+</pre><h2 id="3">Loading on Disk</h2><pre class="codeinput"><span class="comment">% Defining load names &amp; magnitudes</span>
+load.names = {<span class="string">'Camera 1'</span>, <span class="string">'Camera 2'</span>, <span class="string">'Camera 3'</span>, <span class="string">'Camera 3 Mount'</span>, <span class="keyword">...</span>
+    <span class="string">'Weight Disk'</span>};
+load.magnitudes = [(.4922 / 2.205) (.4922/ 2.205) (.4922 / 2.205) <span class="keyword">...</span>
+    (.3483 / 2.205) disk.mass];
+
+<span class="comment">% Assigning names to structure</span>
+<span class="keyword">for</span> ii = 1:length(load.names)
+
+    forces(ii).name = load.names{ii};
+
+<span class="keyword">end</span>
+
+<span class="comment">% Defining load coordinates (m)</span>
+forces(1).loadCoord = [-1.9375 -4.226 (disk.thickness / 2)] / 39.37;
+forces(2).loadCoord = [2.852 0 (disk.thickness / 2)] / 39.37;
+forces(3).loadCoord = [-1.9375 .7298 (disk.thickness / 2)] / 39.37;
+forces(4).loadCoord = [-1.9 2.2267 (disk.thickness / 2)] / 39.37;
+forces(5).loadCoord = [0 0 0];
+
+<span class="comment">% Defining loads</span>
+<span class="keyword">for</span> ii = 1:length(load.magnitudes)
+
+    <span class="comment">% Load in (x,y,z) coordinate system</span>
+    forces(ii).loadMag = [0 0 -load.magnitudes(ii)];
+
+<span class="keyword">end</span>
+</pre><h2 id="4">Solving for Reaction Forces</h2><pre class="codeinput"><span class="comment">% Defining symbolic variables</span>
+syms <span class="string">Ry</span>
+
+<span class="comment">% Sum of forces in y-direction</span>
+summation.forcesY = 0 == Ry + forces(1).loadMag(3) + <span class="keyword">...</span>
+    forces(2).loadMag(3) + forces(3).loadMag(3) + forces(4).loadMag(3) <span class="keyword">...</span>
+    + forces(5).loadMag(3);
+
+<span class="comment">% Reaction force</span>
+Ry = double(solve(summation.forcesY, Ry));
+</pre><h2 id="5">Calculating Bending Moments</h2><pre class="codeinput"><span class="comment">% Initializing bending moment matrix</span>
+M = zeros(1, 3, length(forces));
+
+<span class="comment">% Calclulating bending moment</span>
+<span class="comment">% M = r x F</span>
+<span class="keyword">for</span> ii = 1:length(forces)
+
+    M(:, :, ii) = cross(forces(ii).loadCoord, forces(ii).loadMag);
+
+<span class="keyword">end</span>
+</pre><h2 id="6">Stress Due to Torsion</h2><pre class="codeinput"><span class="comment">% Torque induced by motor (Nm)</span>
+T = 1.5;
+
+<span class="comment">% Calculating polar moment of intertia</span>
+J = (pi / 32) .* ((disk.outerRadius .^ 4) - (disk.innerRadius ^ 4));
+
+<span class="comment">% Calculating shear stress</span>
+stress.tau = T .* disk.outerRadius ./ J;
+
+FS.torsion = disk.yield / stress.tau;
+</pre><h2 id="7">Bending Stress</h2><pre class="codeinput"><span class="comment">% Initializing bending stress values</span>
+[stress.bendingX, stress.bendingY] = deal(0);
+
+<span class="comment">% Defining bending moment direction (x or y)</span>
+<span class="keyword">for</span> ii = 1:length(M)
+
+    <span class="comment">% Bending stress about x-axis</span>
+    stress.bendingX = stress.bendingX + M(1, 1, ii);
+
+    <span class="comment">% Bending stress about y-axis</span>
+    stress.bendingY = stress.bendingY + M(1, 2, ii);
+
+<span class="keyword">end</span>
+
+<span class="comment">% Moment of inertia</span>
+I = (disk.mass / 2) * (((disk.outerRadius / 2) ^ 2 ) + <span class="keyword">...</span>
+    ((disk.innerRadius / 2) ^ 2));
+</pre><h2 id="8">Stresses</h2><pre class="codeinput"><span class="comment">% Radial Stress</span>
+stress.r = disk.density * (w ^ 2) * <span class="keyword">...</span>
+    ((3 + disk.poisson) / 8) * <span class="keyword">...</span>
+    ((disk.innerRadius ^ 2) + (disk.outerRadius ^ 2) + <span class="keyword">...</span>
+    (((disk.innerRadius ^ 2) * (disk.outerRadius ^ 2)) <span class="keyword">...</span>
+    ./ (r .^ 2)) - (((1 + (3 * disk.poisson)) / <span class="keyword">...</span>
+    (3 + disk.poisson)) .* (r .^ 2)));
+
+<span class="comment">% Determining max radial stress</span>
+stress.rMax = max(stress.r);
+
+<span class="comment">% Tangential Stress</span>
+stress.t = disk.density * (w ^ 2) * <span class="keyword">...</span>
+    ((3 + disk.poisson) / 8) * <span class="keyword">...</span>
+    ((disk.innerRadius ^2) + (disk.outerRadius ^ 2) - <span class="keyword">...</span>
+    (((disk.innerRadius ^ 2) * (disk.outerRadius ^ 2)) ./<span class="keyword">...</span>
+    (r .^ 2)) - (r .^ 2));
+
+<span class="comment">% Determining max tangential stress</span>
+stress.tMax = max(stress.t);
+
+<span class="comment">% Solving for maximum stress for each combo of material and radius</span>
+stress.temp = cat(3, stress.rMax, stress.tMax);
+stress.max = max(stress.temp, [], 3);
+
+<span class="comment">% Solving for all the FS and storing in a matrix</span>
+FS.rotation =  disk.yield / stress.max;
+</pre><h2 id="9">Radial and Tangential Stress Plot</h2><pre class="codeinput"><span class="comment">% Creating figure for radial and tangential stress plot</span>
+figure(1)
+
+<span class="comment">% Plotting radial stress</span>
+plot(r .* 39.37, stress.r, <span class="string">'DisplayName'</span>, <span class="string">'Radial Stress'</span>);
+
+<span class="comment">% Plot parameters</span>
+hold <span class="string">on</span>
+grid <span class="string">on</span>
+grid <span class="string">minor</span>
+
+<span class="comment">% Plottign tangential stress</span>
+plot(r .* 39.37, stress.t, <span class="string">'DisplayName'</span>, <span class="string">'Tangential Stress'</span>)
+
+<span class="comment">% Plot descriptors</span>
+xlabel(<span class="string">'\emph {Disk Diameter (in)}'</span>,<span class="string">'fontsize'</span>,14,<span class="string">'Interpreter'</span>,<span class="keyword">...</span>
+    <span class="string">'latex'</span>);
+ylabel(<span class="string">'\emph {Stress (Pa)}'</span>,<span class="string">'fontsize'</span>,14,<span class="string">'Interpreter'</span>,<span class="string">'latex'</span>);
+title(<span class="string">'\emph {Stress in Rotating Disk}'</span>,<span class="string">'fontsize'</span>,16,<span class="string">'Interpreter'</span>,<span class="keyword">...</span>
+    <span class="string">'latex'</span>)
+legend(<span class="string">'location'</span>, <span class="string">'Best'</span>, <span class="string">'Interpreter'</span>, <span class="string">'latex'</span>)
+
+<span class="comment">% Ending plotting ability</span>
+hold <span class="string">off</span>
+</pre><img vspace="5" hspace="5" src="finalDiskStressAnalysism_01.png" alt=""> <h2 id="10">Stress Tensor</h2><pre class="codeinput"><span class="comment">% Creating stress tensors (plane-stress)</span>
+stress.stressTensor = [(stress.rMax + sum(stress.bendingX)) <span class="keyword">...</span>
+    stress.tau 0; stress.tau (stress.tMax + sum(stress.bendingY)) 0; <span class="keyword">...</span>
+    0 0 0];
+
+<span class="comment">% FS due to principal stresses</span>
+FS.principal = disk.yield ./ max(eig(stress.stressTensor));
+</pre><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2020b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% Stress In Rotating Disk
+clear; clc; close all
+
+% Conversion from inches to meters
+inToMeter = (1 / 39.37);
+%% Disk Parameters
+
+% Disk material
+disk.material = '6061 - T6 Aluminum';
+
+% Thickness of disk
+disk.thickness = .25 * inToMeter; % m
+
+% Desnity of 6061-T6 aluminum
+disk.density = 2700; % kg/m^3
+
+% Poisson's ratio of 6061-T6 aluminum
+disk.poisson = .325;
+
+% Yield strength of 6061-T6 aluminum
+disk.yield = 255 * 10^6; % Pa
+
+% Disk inner radius
+disk.innerRadius = 5/8; % in
+
+% Disk outer radius
+disk.outerRadius = 12; % in
+
+% Converting radius values to meters
+disk.innerRadius = disk.innerRadius * inToMeter;
+disk.outerRadius = disk.outerRadius * inToMeter;
+
+% Radii (variable)
+r = disk.innerRadius:(.1 * inToMeter):disk.outerRadius(end);
+
+% Angular velocity (Max stress occures at max angular velocity)
+w = 3000; % rpm
+
+% Converting to rad/s
+w = w * 2 * pi / 60;
+
+% Disk volume (m^3)
+disk.volume = pi * ((disk.outerRadius .^ 2) - (disk.innerRadius ^2 )) ...
+    * (disk.thickness);
+
+% Weight of disk
+disk.mass = disk.volume * disk.density; % kg
+
+%% Loading on Disk
+
+% Defining load names & magnitudes
+load.names = {'Camera 1', 'Camera 2', 'Camera 3', 'Camera 3 Mount', ...
+    'Weight Disk'};
+load.magnitudes = [(.4922 / 2.205) (.4922/ 2.205) (.4922 / 2.205) ...
+    (.3483 / 2.205) disk.mass];
+
+% Assigning names to structure
+for ii = 1:length(load.names)
+    
+    forces(ii).name = load.names{ii};
+    
+end
+
+% Defining load coordinates (m)
+forces(1).loadCoord = [-1.9375 -4.226 (disk.thickness / 2)] / 39.37;
+forces(2).loadCoord = [2.852 0 (disk.thickness / 2)] / 39.37;
+forces(3).loadCoord = [-1.9375 .7298 (disk.thickness / 2)] / 39.37;
+forces(4).loadCoord = [-1.9 2.2267 (disk.thickness / 2)] / 39.37;
+forces(5).loadCoord = [0 0 0];
+
+% Defining loads
+for ii = 1:length(load.magnitudes)
+    
+    % Load in (x,y,z) coordinate system
+    forces(ii).loadMag = [0 0 -load.magnitudes(ii)];
+    
+end
+
+%% Solving for Reaction Forces
+
+% Defining symbolic variables
+syms Ry
+
+% Sum of forces in y-direction
+summation.forcesY = 0 == Ry + forces(1).loadMag(3) + ...
+    forces(2).loadMag(3) + forces(3).loadMag(3) + forces(4).loadMag(3) ...
+    + forces(5).loadMag(3);
+
+% Reaction force
+Ry = double(solve(summation.forcesY, Ry));
+
+%% Calculating Bending Moments
+
+% Initializing bending moment matrix
+M = zeros(1, 3, length(forces));
+
+% Calclulating bending moment
+% M = r x F
+for ii = 1:length(forces)
+    
+    M(:, :, ii) = cross(forces(ii).loadCoord, forces(ii).loadMag);
+    
+end
+
+
+%% Stress Due to Torsion
+
+% Torque induced by motor (Nm)
+T = 1.5;
+
+% Calculating polar moment of intertia
+J = (pi / 32) .* ((disk.outerRadius .^ 4) - (disk.innerRadius ^ 4));
+
+% Calculating shear stress
+stress.tau = T .* disk.outerRadius ./ J;
+
+FS.torsion = disk.yield / stress.tau;
+
+%% Bending Stress
+
+% Initializing bending stress values
+[stress.bendingX, stress.bendingY] = deal(0);
+
+% Defining bending moment direction (x or y)
+for ii = 1:length(M)
+    
+    % Bending stress about x-axis
+    stress.bendingX = stress.bendingX + M(1, 1, ii);
+    
+    % Bending stress about y-axis
+    stress.bendingY = stress.bendingY + M(1, 2, ii);
+    
+end
+
+% Moment of inertia
+I = (disk.mass / 2) * (((disk.outerRadius / 2) ^ 2 ) + ...
+    ((disk.innerRadius / 2) ^ 2));
+
+%% Stresses
+
+% Radial Stress
+stress.r = disk.density * (w ^ 2) * ...
+    ((3 + disk.poisson) / 8) * ...
+    ((disk.innerRadius ^ 2) + (disk.outerRadius ^ 2) + ...
+    (((disk.innerRadius ^ 2) * (disk.outerRadius ^ 2)) ...
+    ./ (r .^ 2)) - (((1 + (3 * disk.poisson)) / ...
+    (3 + disk.poisson)) .* (r .^ 2)));
+
+% Determining max radial stress 
+stress.rMax = max(stress.r);
+
+% Tangential Stress
+stress.t = disk.density * (w ^ 2) * ...
+    ((3 + disk.poisson) / 8) * ...
+    ((disk.innerRadius ^2) + (disk.outerRadius ^ 2) - ...
+    (((disk.innerRadius ^ 2) * (disk.outerRadius ^ 2)) ./...
+    (r .^ 2)) - (r .^ 2));
+
+% Determining max tangential stress 
+stress.tMax = max(stress.t);
+
+% Solving for maximum stress for each combo of material and radius
+stress.temp = cat(3, stress.rMax, stress.tMax);
+stress.max = max(stress.temp, [], 3);
+
+% Solving for all the FS and storing in a matrix
+FS.rotation =  disk.yield / stress.max;
+
+
+%% Radial and Tangential Stress Plot
+
+% Creating figure for radial and tangential stress plot
+figure(1)
+
+% Plotting radial stress
+plot(r .* 39.37, stress.r, 'DisplayName', 'Radial Stress');
+
+% Plot parameters
+hold on 
+grid on
+grid minor
+
+% Plottign tangential stress
+plot(r .* 39.37, stress.t, 'DisplayName', 'Tangential Stress')
+
+% Plot descriptors
+xlabel('\emph {Disk Diameter (in)}','fontsize',14,'Interpreter',...
+    'latex');
+ylabel('\emph {Stress (Pa)}','fontsize',14,'Interpreter','latex');
+title('\emph {Stress in Rotating Disk}','fontsize',16,'Interpreter',...
+    'latex')
+legend('location', 'Best', 'Interpreter', 'latex')
+
+% Ending plotting ability
+hold off
+
+%% Stress Tensor
+    
+% Creating stress tensors (plane-stress)
+stress.stressTensor = [(stress.rMax + sum(stress.bendingX)) ...
+    stress.tau 0; stress.tau (stress.tMax + sum(stress.bendingY)) 0; ...
+    0 0 0];
+
+% FS due to principal stresses
+FS.principal = disk.yield ./ max(eig(stress.stressTensor));
+
+##### SOURCE END #####
+--></body></html>

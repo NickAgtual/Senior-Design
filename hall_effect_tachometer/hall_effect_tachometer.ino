@@ -1,25 +1,3 @@
-/*
-Tachometer using micros
-
-On this sketch we are going to measure the period between pulses using the micros() function to get the RPM
-(Revolutions Per Minute) from a sensor on pin 2.
-This way of measuring RPM makes it accurate, responsive and versatile. No matter how fast or slow the loop is
-running, the reading accuracy is not going to be affected. Although, the faster you run the loop, the more amount
-of readings you are going to be able to display every second.
-
-It's coded in a way that the micros rollover doesn't create glitches every 71 minutes, so it can run forever
-without problems.
-
-We use an interrupt for the input so you have to choose pin 2 or 3 (for Arduino Uno/nano). In this example we
-use pin 2.
-
-This sketch was made for my video tutorial shown here: https://www.youtube.com/watch?v=u2uJMJWsfsg
-
-Made by InterlinkKnight
-Last update: 05/23/2019
-*/
-
-
 
 ///////////////
 // Calibration:
@@ -38,14 +16,9 @@ const byte PulsesPerRevolution = 2;  // Set how many pulses there are on each re
 const unsigned long ZeroTimeout = 300000;  // For high response time, a good value would be 100000.
                                            // For reading very low RPM, a good value would be 300000.
 
-
 // Calibration for smoothing RPM:
 const byte numReadings = 2;  // Number of samples for smoothing. The higher, the more smoothing, but it's going to
                              // react slower to changes. 1 = no smoothing. Default: 2.
-
-
-
-
 
 /////////////
 // Variables:
@@ -91,10 +64,6 @@ unsigned long readIndex;  // The index of the current reading.
 unsigned long total;  // The running total.
 unsigned long average;  // The RPM value after applying the smoothing.
 
-
-
-
-
 void setup()  // Start of setup:
 {
 
@@ -107,10 +76,6 @@ void setup()  // Start of setup:
 
 }  // End of setup.
 
-
-
-
-
 void loop()  // Start of loop:
 {
 
@@ -119,10 +84,6 @@ void loop()  // Start of loop:
   // middle of the cycle.
   LastTimeCycleMeasure = LastTimeWeMeasured;  // Store the LastTimeWeMeasured in a variable.
   CurrentMicros = micros();  // Store the micros() in a variable.
-
-
-
-
 
   // CurrentMicros should always be higher than LastTimeWeMeasured, but in rare occasions that's not true.
   // I'm not sure why this happens, but my solution is to compare both and if CurrentMicros is lower than
@@ -133,17 +94,9 @@ void loop()  // Start of loop:
     LastTimeCycleMeasure = CurrentMicros;
   }
 
-
-
-
-
   // Calculate the frequency:
   FrequencyRaw = 10000000000 / PeriodAverage;  // Calculate the frequency using the period between pulses.
 
-
-  
-
-  
   // Detect if pulses stopped or frequency is too low, so we can show 0 Frequency:
   if(PeriodBetweenPulses > ZeroTimeout - ZeroDebouncingExtra || CurrentMicros - LastTimeCycleMeasure > ZeroTimeout - ZeroDebouncingExtra)
   {  // If the pulses are too far apart that we reached the timeout for zero:
@@ -155,26 +108,14 @@ void loop()  // Start of loop:
     ZeroDebouncingExtra = 0;  // Reset the threshold to the normal value so it doesn't bounce.
   }
 
-
-
-
-
   FrequencyReal = FrequencyRaw / 10000;  // Get frequency without decimals.
                                           // This is not used to calculate RPM but we remove the decimals just in case
                                           // you want to print it.
-
-
-
-
 
   // Calculate the RPM:
   RPM = FrequencyRaw / PulsesPerRevolution * 60;  // Frequency divided by amount of pulses per revolution multiply by
                                                   // 60 seconds to get minutes.
   RPM = RPM / 10000;  // Remove the decimals.
-
-
-
-
 
   // Smoothing RPM:
   total = total - readings[readIndex];  // Advance to the next position in the array.
@@ -190,32 +131,11 @@ void loop()  // Start of loop:
   // Calculate the average:
   average = total / numReadings;  // The average value it's the smoothed result.
 
-
-
-
-
   // Print information on the serial monitor:
-  // Comment this section if you have a display and you don't need to monitor the values on the serial monitor.
-  // This is because disabling this section would make the loop run faster.
-
-  //Serial.print("Period: ");
-  //Serial.print(PeriodBetweenPulses);
- // Serial.print("\tReadings: ");
-  //Serial.print(AmountOfReadings);
-  //Serial.print("\tFrequency: ");
- // Serial.print(FrequencyReal);
-  //Serial.print("\tRPM: ");
   Serial.print(RPM);
   Serial.print(" ");
-  //Serial.print("\tTachometer: ");
-  //Serial.println(average);
+} 
 
-}  // End of loop.
-
-
-
-
- 
 void Pulse_Event()  // The interrupt runs this to calculate the period between pulses:
 {
 
@@ -225,17 +145,12 @@ void Pulse_Event()  // The interrupt runs this to calculate the period between p
 
   LastTimeWeMeasured = micros();  // Stores the current micros so the next time we have a pulse we would have something to compare with.
 
-
-
-
-
   if(PulseCounter >= AmountOfReadings)  // If counter for amount of readings reach the set limit:
   {
     PeriodAverage = PeriodSum / AmountOfReadings;  // Calculate the final period dividing the sum of all readings by the
                                                    // amount of readings to get the average.
     PulseCounter = 1;  // Reset the counter to start over. The reset value is 1 because its the minimum setting allowed (1 reading).
     PeriodSum = PeriodBetweenPulses;  // Reset PeriodSum to start a new averaging operation.
-
 
     // Change the amount of readings depending on the period between pulses.
     // To be very responsive, ideally we should read every pulse. The problem is that at higher speeds the period gets

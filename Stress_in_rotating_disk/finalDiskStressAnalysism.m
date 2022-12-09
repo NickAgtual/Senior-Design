@@ -1,8 +1,12 @@
 %% Stress In Rotating Disk
 clear; clc; close all
 
+% Conversion from inches to meters
 inToMeter = (1 / 39.37);
 %% Disk Parameters
+
+% Disk material
+disk.material = '6061 - T6 Aluminum';
 
 % Thickness of disk
 disk.thickness = .25 * inToMeter; % m
@@ -40,14 +44,15 @@ disk.volume = pi * ((disk.outerRadius .^ 2) - (disk.innerRadius ^2 )) ...
     * (disk.thickness);
 
 % Weight of disk
-disk.weight = disk.volume * disk.density; % kg
+disk.mass = disk.volume * disk.density; % kg
 
 %% Loading on Disk
 
 % Defining load names & magnitudes
-load.names = {'Camera 1', 'Camer 2', 'Camer 3', 'Weight Disk'};
-load.magnitudes = [(.2205 / 2.205) (.2205/ 2.205) (.3483 / 2.205) ...
-    disk.weight];
+load.names = {'Camera 1', 'Camera 2', 'Camera 3', 'Camera 3 Mount', ...
+    'Weight Disk'};
+load.magnitudes = [(.4922 / 2.205) (.4922/ 2.205) (.4922 / 2.205) ...
+    (.3483 / 2.205) disk.mass];
 
 % Assigning names to structure
 for ii = 1:length(load.names)
@@ -57,10 +62,11 @@ for ii = 1:length(load.names)
 end
 
 % Defining load coordinates (m)
-forces(1).loadCoord = [0 -5.5 (disk.thickness / 2)] / 39.37;
-forces(2).loadCoord = [5.5 0 (disk.thickness / 2)] / 39.37;
-forces(3).loadCoord = [0 2 (disk.thickness / 2)] / 39.37;
-forces(4).loadCoord = [0 0 0];
+forces(1).loadCoord = [-1.9375 -4.226 (disk.thickness / 2)] / 39.37;
+forces(2).loadCoord = [2.852 0 (disk.thickness / 2)] / 39.37;
+forces(3).loadCoord = [-1.9375 .7298 (disk.thickness / 2)] / 39.37;
+forces(4).loadCoord = [-1.9 2.2267 (disk.thickness / 2)] / 39.37;
+forces(5).loadCoord = [0 0 0];
 
 % Defining loads
 for ii = 1:length(load.magnitudes)
@@ -77,7 +83,8 @@ syms Ry
 
 % Sum of forces in y-direction
 summation.forcesY = 0 == Ry + forces(1).loadMag(3) + ...
-    forces(2).loadMag(3) + forces(3).loadMag(3) + forces(4).loadMag(3);
+    forces(2).loadMag(3) + forces(3).loadMag(3) + forces(4).loadMag(3) ...
+    + forces(5).loadMag(3);
 
 % Reaction force
 Ry = double(solve(summation.forcesY, Ry));
@@ -117,26 +124,19 @@ FS.torsion = disk.yield / stress.tau;
 % Defining bending moment direction (x or y)
 for ii = 1:length(M)
     
-    if M(1, 1, ii) == 0 && M(1, 2, ii) ~= 0
-        
-        stress.bendingY = stress.bendingY + M(1, 2, ii);
-        
-    elseif M(1, 2, ii) == 0 && M(1, 1, ii) ~= 0
-        
-        stress.bendingX = stress.bendingY + M(1, 1, ii);
-        
-    else
-        
-        continue
-        
-    end
+    % Bending stress about x-axis
+    stress.bendingX = stress.bendingX + M(1, 1, ii);
+    
+    % Bending stress about y-axis
+    stress.bendingY = stress.bendingY + M(1, 2, ii);
+    
 end
 
-% Moment of inertia (%FIXXXXXXX)
-I = (1/12) .* disk.outerRadius * (disk.thickness ^ 3);
+% Moment of inertia
+I = (disk.mass / 2) * (((disk.outerRadius / 2) ^ 2 ) + ...
+    ((disk.innerRadius / 2) ^ 2));
 
 %% Stresses
-
 
 % Radial Stress
 stress.r = disk.density * (w ^ 2) * ...
@@ -203,5 +203,3 @@ stress.stressTensor = [(stress.rMax + sum(stress.bendingX)) ...
 
 % FS due to principal stresses
 FS.principal = disk.yield ./ max(eig(stress.stressTensor));
-
-
