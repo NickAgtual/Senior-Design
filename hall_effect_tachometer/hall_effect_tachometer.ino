@@ -1,9 +1,10 @@
-
+// Defining pin for relay
+int relay =13;
 ///////////////
 // Calibration:
 ///////////////
 
-const byte PulsesPerRevolution = 2;  // Set how many pulses there are on each revolution. Default: 2.
+const byte PulsesPerRevolution = 1;  // Set how many pulses there are on each revolution. Default: 2.
 
 
 // If the period between pulses is too high, or even if the pulses stopped, then we would get stuck showing the
@@ -67,6 +68,8 @@ unsigned long average;  // The RPM value after applying the smoothing.
 void setup()  // Start of setup:
 {
 
+  pinMode(relay,OUTPUT); // Defining relay pin as output
+
   Serial.begin(9600);  // Begin serial communication.
   attachInterrupt(digitalPinToInterrupt(2), Pulse_Event, RISING);  // Enable interruption pin 2 when going from LOW to HIGH.
 
@@ -127,14 +130,27 @@ void loop()  // Start of loop:
   {
     readIndex = 0;  // Reset array index.
   }
+
+
   
   // Calculate the average:
   average = total / numReadings;  // The average value it's the smoothed result.
 
   // Print information on the serial monitor:
-  Serial.print(RPM);
-  Serial.print(" ");
+  Serial.println(RPM);
+  Serial.print("");
+
+  solenoid_lock();
 } 
+
+void solenoid_lock(){
+    if (RPM > 0){
+    digitalWrite(relay, HIGH); // Turn the relay on, opening solenoid lock
+  }
+  else{
+    digitalWrite(relay, LOW); // Turn relay off, closing solenoid off
+  }
+}
 
 void Pulse_Event()  // The interrupt runs this to calculate the period between pulses:
 {
