@@ -1,15 +1,19 @@
 // Defining pin for relay
-int relay =13;
-///////////////
-// Calibration:
-///////////////
+int relay = 13;
 
-const byte PulsesPerRevolution = 1;  // Set how many pulses there are on each revolution. Default: 2.
+// Defining pins for 3 laser diodes
+int laser_1 = 3;
+int laser_2 = 4;
+int laser_3 = 5;
+
+// Initializing laser diode status (on)
+digitalWrite(laser_1, HIGH);
+digitalWrite(laser_2, HIGH);
+digitalWrite(laser_3, HIGH);
+
+const byte PulsesPerRevolution = 2;  // Set how many pulses there are on each revolution
 
 
-// If the period between pulses is too high, or even if the pulses stopped, then we would get stuck showing the
-// last value instead of a 0. Because of this we are going to set a limit for the maximum period allowed.
-// If the period is above this value, the RPM will show as 0.
 // The higher the set value, the longer lag/delay will have to sense that pulses stopped, but it will allow readings
 // at very low RPM.
 // Setting a low value is going to allow the detection of stop situations faster, but it will prevent having low RPM readings.
@@ -19,11 +23,7 @@ const unsigned long ZeroTimeout = 300000;  // For high response time, a good val
 
 // Calibration for smoothing RPM:
 const byte numReadings = 2;  // Number of samples for smoothing. The higher, the more smoothing, but it's going to
-                             // react slower to changes. 1 = no smoothing. Default: 2.
-
-/////////////
-// Variables:
-/////////////
+                             // react slower to changes. 1 = no smoothing
 
 volatile unsigned long LastTimeWeMeasured;  // Stores the last time we measured a pulse so we can calculate the period.
 volatile unsigned long PeriodBetweenPulses = ZeroTimeout+1000;  // Stores the period between pulses in microseconds.
@@ -118,7 +118,7 @@ void loop()  // Start of loop:
   // Calculate the RPM:
   RPM = FrequencyRaw / PulsesPerRevolution * 60;  // Frequency divided by amount of pulses per revolution multiply by
                                                   // 60 seconds to get minutes.
-  RPM = RPM / 10000;  // Remove the decimals.
+  RPM = RPM / (10000 * 2);  // Remove the decimals.
 
   // Smoothing RPM:
   total = total - readings[readIndex];  // Advance to the next position in the array.
@@ -131,8 +131,6 @@ void loop()  // Start of loop:
     readIndex = 0;  // Reset array index.
   }
 
-
-  
   // Calculate the average:
   average = total / numReadings;  // The average value it's the smoothed result.
 
@@ -140,7 +138,8 @@ void loop()  // Start of loop:
   Serial.println(RPM);
   Serial.print("");
 
-  solenoid_lock();
+  solenoid_lock(); // Calling function to control solenoid lock
+  laser_command(); // Calling function to control laser visual indicators
 } 
 
 void solenoid_lock(){
@@ -149,6 +148,19 @@ void solenoid_lock(){
   }
   else{
     digitalWrite(relay, LOW); // Turn relay off, closing solenoid off
+  }
+}
+
+void laser_command(){
+  if (RPM > 0){
+    digitalWrite(laser_1, LOW); // Turn laser diode #1 off
+    digitalWrite(laser_2, LOW); // Turn laser diode #2 off
+    digitalWrite(laser_3, LOW); // Turn laser diode #3 off
+  }
+  else{
+    digitalWrite(laser_1, HIGH); // Turn laser diode #1 on
+    digitalWrite(laser_2, HIGH); // Turn laser diode #2 on
+    digitalWrite(laser_3, HIGH); // Turn laser diode #3 on
   }
 }
 
