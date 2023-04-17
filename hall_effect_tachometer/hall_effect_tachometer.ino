@@ -1,28 +1,29 @@
 // Defining pin for relay
-int relay = 13;
+int relay = 10;
 
 // Defining pins for 3 laser diodes
-int laser_1 = 3;
-int laser_2 = 4;
-int laser_3 = 5;
+int laser_1 = 4;
+int laser_2 = 6;
+int laser_3 = 8;
 
-// Initializing laser diode status (on)
-digitalWrite(laser_1, HIGH);
-digitalWrite(laser_2, HIGH);
-digitalWrite(laser_3, HIGH);
 
-const byte PulsesPerRevolution = 2;  // Set how many pulses there are on each revolution
+
+
+
+
+
+const byte PulsesPerRevolution = 12;  // Set how many pulses there are on each revolution
 
 
 // The higher the set value, the longer lag/delay will have to sense that pulses stopped, but it will allow readings
 // at very low RPM.
 // Setting a low value is going to allow the detection of stop situations faster, but it will prevent having low RPM readings.
 // The unit is in microseconds.
-const unsigned long ZeroTimeout = 300000;  // For high response time, a good value would be 100000.
+const unsigned long ZeroTimeout = 900000;  // For high response time, a good value would be 100000.
                                            // For reading very low RPM, a good value would be 300000.
 
 // Calibration for smoothing RPM:
-const byte numReadings = 2;  // Number of samples for smoothing. The higher, the more smoothing, but it's going to
+const byte numReadings = 1;  // Number of samples for smoothing. The higher, the more smoothing, but it's going to
                              // react slower to changes. 1 = no smoothing
 
 volatile unsigned long LastTimeWeMeasured;  // Stores the last time we measured a pulse so we can calculate the period.
@@ -68,10 +69,24 @@ unsigned long average;  // The RPM value after applying the smoothing.
 void setup()  // Start of setup:
 {
 
+  // Defining pin mode for lasers
+pinMode(laser_1, OUTPUT);
+pinMode(laser_2, OUTPUT);
+pinMode(laser_3, OUTPUT);
+
+// Initializing laser diode status (on)
+digitalWrite(laser_1, HIGH);
+digitalWrite(laser_2, HIGH);
+digitalWrite(laser_3, HIGH);
+  
+
   pinMode(relay,OUTPUT); // Defining relay pin as output
+  digitalWrite(relay, HIGH);
+  digitalWrite(relay, LOW);
+
 
   Serial.begin(9600);  // Begin serial communication.
-  attachInterrupt(digitalPinToInterrupt(2), Pulse_Event, RISING);  // Enable interruption pin 2 when going from LOW to HIGH.
+  attachInterrupt(digitalPinToInterrupt(3), Pulse_Event, RISING);  // Enable interruption pin 2 when going from LOW to HIGH.
 
   delay(1000);  // We sometimes take several readings of the period to average. Since we don't have any readings
                 // stored we need a high enough value in micros() so if divided is not going to give negative values.
@@ -81,6 +96,7 @@ void setup()  // Start of setup:
 
 void loop()  // Start of loop:
 {
+
 
   // The following is going to store the two values that might change in the middle of the cycle.
   // We are going to do math and functions with those values and they can create glitches if they change in the
@@ -118,7 +134,7 @@ void loop()  // Start of loop:
   // Calculate the RPM:
   RPM = FrequencyRaw / PulsesPerRevolution * 60;  // Frequency divided by amount of pulses per revolution multiply by
                                                   // 60 seconds to get minutes.
-  RPM = RPM / (10000 * 2);  // Remove the decimals.
+  RPM = RPM / (10000 / PulsesPerRevolution);  // Remove the decimals.
 
   // Smoothing RPM:
   total = total - readings[readIndex];  // Advance to the next position in the array.
@@ -148,6 +164,7 @@ void solenoid_lock(){
   }
   else{
     digitalWrite(relay, LOW); // Turn relay off, closing solenoid off
+
   }
 }
 
