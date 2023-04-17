@@ -1,4 +1,35 @@
 clear; clc; close all;
 
-%% Defining Data
-time = linspace(0, 6000, 6000);
+% Defining time data
+time = linspace(0, 21, 21);
+
+% Defining symbolic variable
+syms t
+
+% Defining piecewise function
+v = piecewise(t < 2, 0, ...
+    (2 < t) & (t < 4.5), (200 * t) - 400, ...
+    (4.5 < t) & (t < 7), 500, ...
+    (7 < t) & (t < 9), (250 * t) - 1250, ...
+    (9 < t) & (t < 14), 1000, ...
+    (14 < t) & (t < 19), (-200 * t) + 3800, ...
+    (19 < t) & (t < 21), 0);
+
+% Creating new figure
+figure(1)
+
+% Plotting piecewise function
+fplot(v)
+
+% Setting plot parameters
+xlim([0, 21])
+ylim([-25, 1025]);
+grid on;
+grid minor;
+
+% Plot descriptors
+title('\emph{Velocity Profile}', 'fontsize', ...
+    16, 'Interpreter', 'Latex')
+xlabel('\emph{t [sec]}', 'fontsize', 14, 'Interpreter', 'Latex')
+ylabel('\emph{Angular Velocity [RPM]}',...
+    'fontsize', 14, 'Interpreter', 'Latex')
