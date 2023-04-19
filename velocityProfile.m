@@ -26,7 +26,7 @@ xlim([0, 21])
 ylim([-25, 1025]);
 grid on;
 grid minor;
-
+ 
 % Plot descriptors
 title('\emph{Velocity Profile}', 'fontsize', ...
     16, 'Interpreter', 'Latex')
