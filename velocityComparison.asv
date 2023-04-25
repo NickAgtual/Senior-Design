@@ -1,0 +1,4 @@
+clear; close all; clc
+
+targetVelocities = 100:100:1000;
+actualVelocites 
